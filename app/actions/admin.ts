@@ -1,0 +1,223 @@
+"use server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { signInWithPassword, supabaseFetch } from "@/lib/supabase-rest";
+
+const v = (fd: FormData, k: string) => String(fd.get(k) || "").trim();
+const n = (fd: FormData, k: string) => Number(v(fd, k)) || null;
+const secureCookie = process.env.NODE_ENV === "production";
+
+export async function login(formData: FormData) {
+  const auth = await signInWithPassword(
+    v(formData, "email"),
+    v(formData, "password"),
+  );
+  const jar = await cookies();
+  jar.set("sb-access-token", auth.access_token, {
+    httpOnly: true,
+    secure: secureCookie,
+    sameSite: "lax",
+    path: "/",
+  });
+  jar.set("sb-refresh-token", auth.refresh_token, {
+    httpOnly: true,
+    secure: secureCookie,
+    sameSite: "lax",
+    path: "/",
+  });
+  redirect("/admin");
+}
+export async function logout() {
+  (await cookies()).delete("sb-access-token");
+  redirect("/admin/login");
+}
+export async function updateLeadStatus(formData: FormData) {
+  const id = v(formData, "id");
+  await supabaseFetch(
+    `leads?id=eq.${id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        status: v(formData, "status"),
+        assigned_user_id: v(formData, "assigned_user_id") || null,
+        loss_reason: v(formData, "loss_reason") || null,
+        reapproach_date: v(formData, "reapproach_date") || null,
+        updated_at: new Date().toISOString(),
+      }),
+    },
+    true,
+  );
+  revalidatePath(`/admin/leads/${id}`);
+  revalidatePath("/admin");
+}
+export async function addActivity(formData: FormData) {
+  const lead_id = v(formData, "lead_id");
+  await supabaseFetch(
+    "lead_activities",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        lead_id,
+        activity_type: v(formData, "activity_type"),
+        content: v(formData, "content"),
+        next_action_date: v(formData, "next_action_date") || null,
+      }),
+    },
+    true,
+  );
+  revalidatePath(`/admin/leads/${lead_id}`);
+}
+export async function createFacility(formData: FormData) {
+  await supabaseFetch(
+    "facilities",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        name: v(formData, "name"),
+        address: v(formData, "address"),
+        area: v(formData, "area"),
+        nearest_station: v(formData, "nearest_station"),
+        type: v(formData, "type"),
+        capacity: n(formData, "capacity"),
+        vacancy_count: n(formData, "vacancy_count"),
+        monthly_fee: n(formData, "monthly_fee"),
+        initial_fee: n(formData, "initial_fee"),
+        acceptable_care_levels: v(formData, "acceptable_care_levels"),
+        accepts_dementia: v(formData, "accepts_dementia") === "on",
+        accepts_welfare: v(formData, "accepts_welfare") === "on",
+        medical_support: v(formData, "medical_support"),
+        end_of_life_care: v(formData, "end_of_life_care") === "on",
+        photo_url: v(formData, "photo_url"),
+        description: v(formData, "description"),
+        management_note: v(formData, "management_note"),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/facilities");
+}
+export async function createRoom(formData: FormData) {
+  await supabaseFetch(
+    "rooms",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        facility_id: v(formData, "facility_id"),
+        room_number: v(formData, "room_number"),
+        floor: v(formData, "floor"),
+        rent: n(formData, "rent"),
+        common_fee: n(formData, "common_fee"),
+        meal_fee: n(formData, "meal_fee"),
+        management_fee: n(formData, "management_fee"),
+        status: v(formData, "status"),
+        note: v(formData, "note"),
+        updated_at: new Date().toISOString(),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/rooms");
+}
+export async function createTour(formData: FormData) {
+  await supabaseFetch(
+    "tours",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        lead_id: v(formData, "lead_id"),
+        facility_id: v(formData, "facility_id"),
+        scheduled_at: v(formData, "scheduled_at"),
+        participants: v(formData, "participants"),
+        meeting_place: v(formData, "meeting_place"),
+        result: v(formData, "result"),
+        impression: v(formData, "impression"),
+        next_action: v(formData, "next_action"),
+        note: v(formData, "note"),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/tours");
+}
+
+export async function createReferrer(formData: FormData) {
+  await supabaseFetch(
+    "referrers",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        type: v(formData, "type"),
+        name: v(formData, "name"),
+        contact_person: v(formData, "contact_person"),
+        phone: v(formData, "phone"),
+        email: v(formData, "email"),
+        address: v(formData, "address"),
+        last_contact_date: v(formData, "last_contact_date") || null,
+        note: v(formData, "note"),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/referrers");
+}
+
+export async function createAdReport(formData: FormData) {
+  const cost = n(formData, "cost") || 0;
+  const clicks = n(formData, "clicks") || 0;
+  const conversions = n(formData, "conversions") || 0;
+  const moveIns = n(formData, "move_ins") || 0;
+
+  await supabaseFetch(
+    "ad_reports",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        date: v(formData, "date"),
+        campaign_name: v(formData, "campaign_name"),
+        ad_group_name: v(formData, "ad_group_name"),
+        keyword: v(formData, "keyword"),
+        cost,
+        impressions: n(formData, "impressions") || 0,
+        clicks,
+        conversions,
+        tours: n(formData, "tours") || 0,
+        move_ins: moveIns,
+        cpa: conversions > 0 ? Math.round(cost / conversions) : null,
+        move_in_unit_cost: moveIns > 0 ? Math.round(cost / moveIns) : null,
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/ads");
+}
+
+export async function createLpPage(formData: FormData) {
+  const slug = v(formData, "slug")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  await supabaseFetch(
+    "lp_pages",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        title: v(formData, "title"),
+        slug,
+        target_keyword: v(formData, "target_keyword"),
+        hero_copy: v(formData, "hero_copy"),
+        body: {
+          target: v(formData, "target"),
+          worries: v(formData, "worries"),
+          faq: v(formData, "faq"),
+        },
+        status: v(formData, "status") || "draft",
+        updated_at: new Date().toISOString(),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/lps");
+}

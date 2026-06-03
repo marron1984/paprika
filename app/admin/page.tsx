@@ -1,0 +1,85 @@
+import { redirect } from "next/navigation";
+import { AdminShell } from "@/components/AdminShell";
+import { requireSession, supabaseFetch } from "@/lib/supabase-rest";
+import type { Lead, Room, Tour } from "@/lib/types";
+export default async function Admin() {
+  if (!(await requireSession())) redirect("/admin/login");
+  const [leads, rooms, tours] = await Promise.all([
+    supabaseFetch<Lead[]>(
+      "leads?select=*&order=created_at.desc&limit=200",
+      {},
+      true,
+    ),
+    supabaseFetch<Room[]>("rooms?select=*&limit=200", {}, true),
+    supabaseFetch<Tour[]>(
+      "tours?select=*&order=scheduled_at.desc&limit=50",
+      {},
+      true,
+    ),
+  ]);
+  const month = new Date().toISOString().slice(0, 7);
+  const monthly = leads.filter((l) => l.created_at?.startsWith(month));
+  const moved = leads.filter((l) => l.status === "入居完了").length;
+  const lost = leads.filter((l) => l.status === "失注").length;
+  const vacant = rooms.filter((r) => r.status === "空室").length;
+  const cards = [
+    ["問い合わせ数", monthly.length],
+    ["見学数", tours.length],
+    ["入居数", moved],
+    ["失注数", lost],
+    [
+      "成約率",
+      `${leads.length ? Math.round((moved / leads.length) * 100) : 0}%`,
+    ],
+    ["空室数", vacant],
+  ];
+  const status = Object.entries(
+    leads.reduce<Record<string, number>>((a, l) => {
+      a[l.status] = (a[l.status] || 0) + 1;
+      return a;
+    }, {}),
+  );
+  return (
+    <AdminShell>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-black">簡易ダッシュボード</h1>
+          <p className="mt-2 text-slate-600">
+            月次KPI・ステータス別件数・空室状況を確認できます。
+          </p>
+        </div>
+      </div>
+      <div className="mt-6 grid gap-4 md:grid-cols-6">
+        {cards.map(([k, v]) => (
+          <div className="card p-5" key={k}>
+            <p className="text-sm font-bold text-slate-500">{k}</p>
+            <p className="mt-2 text-3xl font-black text-blue-700">{v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
+        <section className="card p-6">
+          <h2 className="text-xl font-black">ステータス別件数</h2>
+          <div className="mt-4 grid gap-3">
+            {status.map(([s, c]) => (
+              <div key={s} className="flex items-center justify-between">
+                <span className="status">{s}</span>
+                <b>{c}件</b>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="card p-6">
+          <h2 className="text-xl font-black">CVトラッキング設計</h2>
+          <ul className="mt-4 grid gap-2 text-slate-600">
+            <li>CV1 問い合わせフォーム送信</li>
+            <li>CV2 電話タップ</li>
+            <li>CV3 LINE追加</li>
+            <li>CV4 見学予約</li>
+            <li>CV5 入居完了</li>
+          </ul>
+        </section>
+      </div>
+    </AdminShell>
+  );
+}
