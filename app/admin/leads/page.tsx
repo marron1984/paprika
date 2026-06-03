@@ -23,7 +23,12 @@ export default async function Leads({
   );
   return (
     <AdminShell>
-      <h1 className="text-3xl font-black">案件一覧</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-black">案件一覧</h1>
+        <a className="btn btn-secondary" href="/admin/export/leads">
+          CSV出力
+        </a>
+      </div>
       <form className="mt-5 flex flex-wrap gap-3">
         <input
           className="input max-w-xs"

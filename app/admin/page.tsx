@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
 import { requireSession, supabaseFetch } from "@/lib/supabase-rest";
 import type { Lead, Room, Tour } from "@/lib/types";
+
 export default async function Admin() {
   if (!(await requireSession())) redirect("/admin/login");
   const [leads, rooms, tours] = await Promise.all([
@@ -78,6 +79,26 @@ export default async function Admin() {
             <li>CV4 見学予約</li>
             <li>CV5 入居完了</li>
           </ul>
+        </section>
+        <section className="card p-6">
+          <h2 className="text-xl font-black">CSV出力</h2>
+          <p className="mt-2 text-sm text-slate-500">
+            案件・施設・部屋・見学・広告・紹介元をCSVで出力します。
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[
+              ["/admin/export/leads", "案件"],
+              ["/admin/export/facilities", "施設"],
+              ["/admin/export/rooms", "部屋"],
+              ["/admin/export/tours", "見学"],
+              ["/admin/export/ads", "広告"],
+              ["/admin/export/referrers", "紹介元"],
+            ].map(([href, label]) => (
+              <a className="btn btn-secondary py-2" href={href} key={href}>
+                {label}
+              </a>
+            ))}
+          </div>
         </section>
       </div>
     </AdminShell>

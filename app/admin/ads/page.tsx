@@ -27,7 +27,12 @@ export default async function Ads() {
 
   return (
     <AdminShell>
-      <h1 className="text-3xl font-black">広告管理</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-black">広告管理</h1>
+        <a className="btn btn-secondary" href="/admin/export/ads">
+          CSV出力
+        </a>
+      </div>
       <p className="mt-2 text-slate-600">
         MVPではGoogle広告の数値を手入力し、CPA・入居単価を管理します。
       </p>

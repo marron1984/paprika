@@ -9,7 +9,7 @@ export function PublicHeader() {
         <nav className="hide-mobile flex gap-5 text-sm font-bold text-slate-600">
           <a href="#worries">相談内容</a>
           <a href="#flow">流れ</a>
-          <a href="#facilities">施設</a>
+          <a href="/facilities">施設・空室</a>
           <a href="#form">相談フォーム</a>
         </nav>
         <div className="flex gap-2">

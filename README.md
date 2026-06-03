@@ -17,7 +17,7 @@
 
 ## MVP機能
 
-- 公開トップページ、電話CTA、LINE CTA、問い合わせフォーム、完了ページ
+- 公開トップページ、施設・空室公開ページ、電話CTA、LINE CTA、問い合わせフォーム、完了ページ
 - 問い合わせをSupabaseの `leads` に登録
 - 管理ログイン（Supabase Auth）
 - 案件一覧、カンバン、案件詳細、ステータス変更、対応履歴
@@ -29,9 +29,11 @@
 - LP管理: Google広告向けLPのタイトル、slug、キーワード、本文要素、公開状態を管理できます。
 - 広告管理: 手入力の広告費、表示回数、クリック数、問い合わせ数、見学数、入居数からCPAと入居単価を記録できます。
 - 紹介元管理: ケアマネ、病院、MSW、地域包括、WEBなどの紹介元と営業メモを管理できます。
+- CSV出力: 案件、施設、部屋、見学、広告、紹介元を管理画面からCSVで出力できます。
+- 空室公開: `/facilities` で管理画面の施設・部屋情報を公開側に反映できます。
 
 ## 実装メモ
 
 - 管理画面は `robots: noindex` を設定し、各ページでSupabase AuthのセッションCookieを確認します。
 - SupabaseクライアントSDKに依存せず、REST APIで保存・取得するため、サーバーアクションから将来のLINE/AI/広告API連携を追加しやすい構成です。
-- Tailwind CSSはv3系のPostCSS構成にしており、`tailwind.config.ts` の `content` に `app`、`components`、`lib` を含めています。
+- Tailwind CSSはNext.js 16環境に合わせて `@tailwindcss/postcss` を使うPostCSS構成にしています。

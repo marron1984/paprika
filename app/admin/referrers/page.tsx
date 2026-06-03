@@ -28,7 +28,12 @@ export default async function Referrers() {
 
   return (
     <AdminShell>
-      <h1 className="text-3xl font-black">紹介元管理</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-black">紹介元管理</h1>
+        <a className="btn btn-secondary" href="/admin/export/referrers">
+          CSV出力
+        </a>
+      </div>
       <p className="mt-2 text-slate-600">
         ケアマネ・病院・地域包括・WEBなどの紹介元別に件数と営業メモを管理します。
       </p>

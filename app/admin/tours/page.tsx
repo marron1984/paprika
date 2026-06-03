@@ -24,7 +24,12 @@ export default async function Tours() {
   ]);
   return (
     <AdminShell>
-      <h1 className="text-3xl font-black">見学管理</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-black">見学管理</h1>
+        <a className="btn btn-secondary" href="/admin/export/tours">
+          CSV出力
+        </a>
+      </div>
       <form
         action={createTour}
         className="card mt-6 grid gap-4 p-6 md:grid-cols-3"
