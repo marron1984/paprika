@@ -34,7 +34,7 @@
 
 ## 実装メモ
 
-- 管理画面は `robots: noindex` を設定し、各ページでSupabase AuthのセッションCookieを確認します。
+- 管理画面は `robots: noindex` を設定し、各ページでSupabase AuthのアクセストークンをSupabase Auth APIで検証します。管理系サーバーアクションも同じ検証を通してから更新処理を実行します。
 - SupabaseクライアントSDKに依存せず、REST APIで保存・取得するため、サーバーアクションから将来のLINE/AI/広告API連携を追加しやすい構成です。
 - Tailwind CSSはNext.js 16環境に合わせて `@tailwindcss/postcss` を使うPostCSS構成にしています。
 

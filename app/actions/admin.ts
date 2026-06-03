@@ -2,11 +2,19 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { signInWithPassword, supabaseFetch } from "@/lib/supabase-rest";
+import {
+  requireSession,
+  signInWithPassword,
+  supabaseFetch,
+} from "@/lib/supabase-rest";
 
 const v = (fd: FormData, k: string) => String(fd.get(k) || "").trim();
 const n = (fd: FormData, k: string) => Number(v(fd, k)) || null;
 const secureCookie = process.env.NODE_ENV === "production";
+
+async function requireAdminSession() {
+  if (!(await requireSession())) redirect("/admin/login");
+}
 
 export async function login(formData: FormData) {
   const auth = await signInWithPassword(
@@ -19,20 +27,25 @@ export async function login(formData: FormData) {
     secure: secureCookie,
     sameSite: "lax",
     path: "/",
+    maxAge: auth.expires_in,
   });
   jar.set("sb-refresh-token", auth.refresh_token, {
     httpOnly: true,
     secure: secureCookie,
     sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60 * 24 * 30,
   });
   redirect("/admin");
 }
 export async function logout() {
-  (await cookies()).delete("sb-access-token");
+  const jar = await cookies();
+  jar.delete("sb-access-token");
+  jar.delete("sb-refresh-token");
   redirect("/admin/login");
 }
 export async function updateLeadStatus(formData: FormData) {
+  await requireAdminSession();
   const id = v(formData, "id");
   await supabaseFetch(
     `leads?id=eq.${id}`,
@@ -52,6 +65,7 @@ export async function updateLeadStatus(formData: FormData) {
   revalidatePath("/admin");
 }
 export async function addActivity(formData: FormData) {
+  await requireAdminSession();
   const lead_id = v(formData, "lead_id");
   await supabaseFetch(
     "lead_activities",
@@ -69,6 +83,7 @@ export async function addActivity(formData: FormData) {
   revalidatePath(`/admin/leads/${lead_id}`);
 }
 export async function createFacility(formData: FormData) {
+  await requireAdminSession();
   await supabaseFetch(
     "facilities",
     {
@@ -98,6 +113,7 @@ export async function createFacility(formData: FormData) {
   revalidatePath("/admin/facilities");
 }
 export async function createRoom(formData: FormData) {
+  await requireAdminSession();
   await supabaseFetch(
     "rooms",
     {
@@ -120,6 +136,7 @@ export async function createRoom(formData: FormData) {
   revalidatePath("/admin/rooms");
 }
 export async function createTour(formData: FormData) {
+  await requireAdminSession();
   await supabaseFetch(
     "tours",
     {
@@ -142,6 +159,7 @@ export async function createTour(formData: FormData) {
 }
 
 export async function createReferrer(formData: FormData) {
+  await requireAdminSession();
   await supabaseFetch(
     "referrers",
     {
@@ -163,6 +181,7 @@ export async function createReferrer(formData: FormData) {
 }
 
 export async function createAdReport(formData: FormData) {
+  await requireAdminSession();
   const cost = n(formData, "cost") || 0;
   const clicks = n(formData, "clicks") || 0;
   const conversions = n(formData, "conversions") || 0;
@@ -193,6 +212,7 @@ export async function createAdReport(formData: FormData) {
 }
 
 export async function createLpPage(formData: FormData) {
+  await requireAdminSession();
   const slug = v(formData, "slug")
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, "-")
@@ -223,6 +243,7 @@ export async function createLpPage(formData: FormData) {
 }
 
 export async function updateSiteSettings(formData: FormData) {
+  await requireAdminSession();
   const settings = {
     siteName: v(formData, "siteName") || "DCかいご相談ダイヤル",
     phoneNumber: v(formData, "phoneNumber"),

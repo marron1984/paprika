@@ -47,12 +47,29 @@ export async function signInWithPassword(email: string, password: string) {
   return res.json() as Promise<{
     access_token: string;
     refresh_token: string;
+    expires_in: number;
     user: { id: string; email?: string };
   }>;
+}
+
+export async function getSessionUser(token: string) {
+  const base = assertConfig(url, "NEXT_PUBLIC_SUPABASE_URL");
+  const key = assertConfig(anonKey, "NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  const res = await fetch(`${base}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  return res.json() as Promise<{ id: string; email?: string }>;
 }
 
 export async function requireSession() {
   const token = (await cookies()).get("sb-access-token")?.value;
   if (!token) return null;
-  return token;
+
+  const user = await getSessionUser(token);
+  if (!user) return null;
+
+  return { token, user };
 }
