@@ -1,0 +1,2 @@
+import { PublicHeader } from "@/components/PublicHeader";
+export default function Thanks(){return <><PublicHeader/><main className="section"><div className="container"><div className="card p-10 text-center"><span className="badge">送信完了</span><h1 className="mt-4 text-4xl font-black">ご相談を受け付けました</h1><p className="mt-4 text-slate-600">専門スタッフが内容を確認し、順次ご連絡いたします。</p><a className="btn btn-primary mt-8" href="/">トップへ戻る</a></div></div></main></>}
