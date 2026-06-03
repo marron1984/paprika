@@ -139,3 +139,18 @@ export type LpPage = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type SiteSettings = {
+  siteName: string;
+  phoneNumber: string;
+  lineUrl: string;
+  gtmId?: string;
+  googleAdsConversionId?: string;
+  googleAdsConversionLabel?: string;
+};
+
+export type SiteSettingsRow = {
+  key: string;
+  value: SiteSettings;
+  updated_at?: string;
+};

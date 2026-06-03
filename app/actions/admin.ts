@@ -221,3 +221,30 @@ export async function createLpPage(formData: FormData) {
   );
   revalidatePath("/admin/lps");
 }
+
+export async function updateSiteSettings(formData: FormData) {
+  const settings = {
+    siteName: v(formData, "siteName") || "DCかいご相談ダイヤル",
+    phoneNumber: v(formData, "phoneNumber"),
+    lineUrl: v(formData, "lineUrl"),
+    gtmId: v(formData, "gtmId"),
+    googleAdsConversionId: v(formData, "googleAdsConversionId"),
+    googleAdsConversionLabel: v(formData, "googleAdsConversionLabel"),
+  };
+
+  await supabaseFetch(
+    "site_settings",
+    {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({
+        key: "site",
+        value: settings,
+        updated_at: new Date().toISOString(),
+      }),
+    },
+    true,
+  );
+  revalidatePath("/admin/settings");
+  revalidatePath("/", "layout");
+}

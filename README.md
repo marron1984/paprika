@@ -37,3 +37,9 @@
 - 管理画面は `robots: noindex` を設定し、各ページでSupabase AuthのセッションCookieを確認します。
 - SupabaseクライアントSDKに依存せず、REST APIで保存・取得するため、サーバーアクションから将来のLINE/AI/広告API連携を追加しやすい構成です。
 - Tailwind CSSはNext.js 16環境に合わせて `@tailwindcss/postcss` を使うPostCSS構成にしています。
+
+
+## 追加機能メモ
+
+- 管理画面の「サイト設定」から、公開サイト名・電話番号・LINE相談URL・Google Tag Manager ID・Google広告コンバージョンID/ラベルを更新できます。
+- 設定値は `site_settings` テーブルの `key = 'site'` にJSONとして保存され、公開ヘッダー/CTA/共通レイアウトの計測タグに反映されます。

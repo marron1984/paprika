@@ -1,7 +1,19 @@
+import Script from "next/script";
 import { PublicHeader } from "@/components/PublicHeader";
-export default function Thanks() {
+import { getSiteSettings } from "@/lib/site-settings";
+
+export default async function Thanks() {
+  const settings = await getSiteSettings();
+  const conversionId = settings.googleAdsConversionId?.trim();
+  const conversionLabel = settings.googleAdsConversionLabel?.trim();
+
   return (
     <>
+      {conversionId && conversionLabel ? (
+        <Script id="google-ads-form-conversion" strategy="afterInteractive">
+          {`if (typeof gtag === 'function') { gtag('event','conversion',{'send_to':'${conversionId}/${conversionLabel}'}); }`}
+        </Script>
+      ) : null}
       <PublicHeader />
       <main className="section">
         <div className="container">

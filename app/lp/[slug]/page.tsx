@@ -1,6 +1,6 @@
 import { InquiryForm } from "@/components/InquiryForm";
 import { PublicHeader } from "@/components/PublicHeader";
-import { lineUrl, phoneNumber, siteName } from "@/lib/constants";
+import { getSiteSettings, normalizeTelHref } from "@/lib/site-settings";
 
 export default async function LandingPage({
   params,
@@ -9,6 +9,7 @@ export default async function LandingPage({
 }) {
   const { slug } = await params;
   const title = decodeURIComponent(slug);
+  const settings = await getSiteSettings();
   return (
     <>
       <PublicHeader />
@@ -19,17 +20,20 @@ export default async function LandingPage({
               <span className="badge">広告LPテンプレート</span>
               <h1 className="mt-4 text-4xl font-black">{title}</h1>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                {siteName}
+                {settings.siteName}
                 では、条件が難しい介護施設探しも無料で整理し、候補施設の提案から見学調整までサポートします。
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a className="btn btn-primary" href="#form">
                   無料で相談する
                 </a>
-                <a className="btn btn-secondary" href={`tel:${phoneNumber}`}>
+                <a
+                  className="btn btn-secondary"
+                  href={normalizeTelHref(settings.phoneNumber)}
+                >
                   電話CTA
                 </a>
-                <a className="btn btn-line" href={lineUrl}>
+                <a className="btn btn-line" href={settings.lineUrl}>
                   LINE CTA
                 </a>
               </div>

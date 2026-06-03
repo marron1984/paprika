@@ -10,6 +10,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     ["/admin/referrers", "紹介元管理"],
     ["/admin/ads", "広告管理"],
     ["/admin/lps", "LP管理"],
+    ["/admin/settings", "サイト設定"],
   ];
   return (
     <div className="admin-grid bg-slate-50">

@@ -1,6 +1,6 @@
 import { InquiryForm } from "@/components/InquiryForm";
 import { PublicHeader } from "@/components/PublicHeader";
-import { lineUrl, phoneNumber, siteName } from "@/lib/constants";
+import { getSiteSettings, normalizeTelHref } from "@/lib/site-settings";
 
 const worries = [
   "認知症の方の入居相談",
@@ -27,7 +27,9 @@ const flow = [
   "入居フォロー",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getSiteSettings();
+
   return (
     <>
       <PublicHeader />
@@ -48,21 +50,25 @@ export default function Home() {
                 <a className="btn btn-primary" href="#form">
                   無料で相談する
                 </a>
-                <a className="btn btn-secondary" href={`tel:${phoneNumber}`}>
+                <a
+                  className="btn btn-secondary"
+                  href={normalizeTelHref(settings.phoneNumber)}
+                >
                   電話で相談する
                 </a>
-                <a className="btn btn-line" href={lineUrl}>
+                <a className="btn btn-line" href={settings.lineUrl}>
                   LINEで相談する
                 </a>
               </div>
               <p className="mt-4 text-sm text-slate-500">
-                電話番号：{phoneNumber}（管理画面の設定値で差し替え可能）
+                電話番号：{settings.phoneNumber}
+                （管理画面の設定値で差し替え可能）
               </p>
             </div>
             <div className="card p-7">
               <div className="rounded-3xl bg-blue-50 p-7">
                 <p className="text-sm font-bold text-blue-700">
-                  {siteName}の相談範囲
+                  {settings.siteName}の相談範囲
                 </p>
                 <ul className="mt-5 grid gap-4 text-lg font-bold">
                   {features.map((f) => (
@@ -181,7 +187,7 @@ export default function Home() {
             <p className="mt-3 text-blue-100">
               MVPではLINEボタン設置まで。将来は自動ヒアリング・CRM反映に拡張します。
             </p>
-            <a className="btn btn-line mt-6" href={lineUrl}>
+            <a className="btn btn-line mt-6" href={settings.lineUrl}>
               LINEで相談する
             </a>
           </div>

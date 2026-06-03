@@ -143,6 +143,12 @@ create table if not exists public.ad_reports (
 alter table public.ad_reports add column if not exists cpa int;
 alter table public.ad_reports add column if not exists move_in_unit_cost int;
 
+create table if not exists public.site_settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+
 create table if not exists public.lp_pages (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -163,6 +169,7 @@ alter table public.tours enable row level security;
 alter table public.referrers enable row level security;
 alter table public.ad_reports enable row level security;
 alter table public.lp_pages enable row level security;
+alter table public.site_settings enable row level security;
 
 create policy "public inquiry insert" on public.leads for insert to anon with check (true);
 create policy "service role full leads" on public.leads for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
@@ -173,3 +180,5 @@ create policy "service role full tours" on public.tours for all using (auth.role
 create policy "service role full referrers" on public.referrers for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full ad reports" on public.ad_reports for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full lp pages" on public.lp_pages for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
+
+create policy "service role full site settings" on public.site_settings for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
