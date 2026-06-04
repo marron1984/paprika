@@ -1,4 +1,5 @@
 import { InquiryForm } from "@/components/InquiryForm";
+import { TrackingLink } from "@/components/TrackingLink";
 import { PublicHeader } from "@/components/PublicHeader";
 import { getSiteSettings, normalizeTelHref } from "@/lib/site-settings";
 
@@ -27,15 +28,27 @@ export default async function LandingPage({
                 <a className="btn btn-primary" href="#form">
                   無料で相談する
                 </a>
-                <a
+                <TrackingLink
                   className="btn btn-secondary"
+                  conversionType="CV2"
                   href={normalizeTelHref(settings.phoneNumber)}
+                  label="lp_hero_phone"
+                  metadata={{
+                    lpName: title,
+                    phoneNumber: settings.phoneNumber,
+                  }}
                 >
                   電話CTA
-                </a>
-                <a className="btn btn-line" href={settings.lineUrl}>
+                </TrackingLink>
+                <TrackingLink
+                  className="btn btn-line"
+                  conversionType="CV3"
+                  href={settings.lineUrl}
+                  label="lp_hero_line"
+                  metadata={{ lpName: title }}
+                >
                   LINE CTA
-                </a>
+                </TrackingLink>
               </div>
             </div>
             <div className="card p-6">

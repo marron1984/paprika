@@ -1,4 +1,5 @@
 import { InquiryForm } from "@/components/InquiryForm";
+import { TrackingLink } from "@/components/TrackingLink";
 import { PublicHeader } from "@/components/PublicHeader";
 import { getSiteSettings, normalizeTelHref } from "@/lib/site-settings";
 
@@ -50,15 +51,23 @@ export default async function Home() {
                 <a className="btn btn-primary" href="#form">
                   無料で相談する
                 </a>
-                <a
+                <TrackingLink
                   className="btn btn-secondary"
+                  conversionType="CV2"
                   href={normalizeTelHref(settings.phoneNumber)}
+                  label="home_hero_phone"
+                  metadata={{ phoneNumber: settings.phoneNumber }}
                 >
                   電話で相談する
-                </a>
-                <a className="btn btn-line" href={settings.lineUrl}>
+                </TrackingLink>
+                <TrackingLink
+                  className="btn btn-line"
+                  conversionType="CV3"
+                  href={settings.lineUrl}
+                  label="home_hero_line"
+                >
                   LINEで相談する
-                </a>
+                </TrackingLink>
               </div>
               <p className="mt-4 text-sm text-slate-500">
                 電話番号：{settings.phoneNumber}
@@ -187,9 +196,14 @@ export default async function Home() {
             <p className="mt-3 text-blue-100">
               MVPではLINEボタン設置まで。将来は自動ヒアリング・CRM反映に拡張します。
             </p>
-            <a className="btn btn-line mt-6" href={settings.lineUrl}>
+            <TrackingLink
+              className="btn btn-line mt-6"
+              conversionType="CV3"
+              href={settings.lineUrl}
+              label="home_footer_line"
+            >
               LINEで相談する
-            </a>
+            </TrackingLink>
           </div>
         </section>
       </main>

@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
 import { requireSession, supabaseFetch } from "@/lib/supabase-rest";
-import type { Lead, Room, Tour } from "@/lib/types";
+import type { ConversionEvent, Lead, Room, Tour } from "@/lib/types";
 
 export default async function Admin() {
   if (!(await requireSession())) redirect("/admin/login");
-  const [leads, rooms, tours] = await Promise.all([
+  const [leads, rooms, tours, conversionEvents] = await Promise.all([
     supabaseFetch<Lead[]>(
       "leads?select=*&order=created_at.desc&limit=200",
       {},
@@ -17,12 +17,27 @@ export default async function Admin() {
       {},
       true,
     ),
+    supabaseFetch<ConversionEvent[]>(
+      "conversion_events?select=*&order=created_at.desc&limit=500",
+      {},
+      true,
+    ),
   ]);
   const month = new Date().toISOString().slice(0, 7);
   const monthly = leads.filter((l) => l.created_at?.startsWith(month));
   const moved = leads.filter((l) => l.status === "入居完了").length;
   const lost = leads.filter((l) => l.status === "失注").length;
   const vacant = rooms.filter((r) => r.status === "空室").length;
+  const monthlyConversions = conversionEvents.filter((event) =>
+    event.created_at?.startsWith(month),
+  );
+  const conversionCounts = monthlyConversions.reduce<Record<string, number>>(
+    (acc, event) => {
+      acc[event.event_type] = (acc[event.event_type] || 0) + 1;
+      return acc;
+    },
+    {},
+  );
   const cards = [
     ["問い合わせ数", monthly.length],
     ["見学数", tours.length],
@@ -33,6 +48,8 @@ export default async function Admin() {
       `${leads.length ? Math.round((moved / leads.length) * 100) : 0}%`,
     ],
     ["空室数", vacant],
+    ["電話タップ", conversionCounts.CV2 || 0],
+    ["LINE追加", conversionCounts.CV3 || 0],
   ];
   const status = Object.entries(
     leads.reduce<Record<string, number>>((a, l) => {
@@ -71,14 +88,21 @@ export default async function Admin() {
           </div>
         </section>
         <section className="card p-6">
-          <h2 className="text-xl font-black">CVトラッキング設計</h2>
-          <ul className="mt-4 grid gap-2 text-slate-600">
-            <li>CV1 問い合わせフォーム送信</li>
-            <li>CV2 電話タップ</li>
-            <li>CV3 LINE追加</li>
-            <li>CV4 見学予約</li>
-            <li>CV5 入居完了</li>
-          </ul>
+          <h2 className="text-xl font-black">CVトラッキング</h2>
+          <div className="mt-4 grid gap-3">
+            {[
+              ["CV1 問い合わせフォーム送信", conversionCounts.CV1 || 0],
+              ["CV2 電話タップ", conversionCounts.CV2 || 0],
+              ["CV3 LINE追加", conversionCounts.CV3 || 0],
+              ["CV4 見学予約", conversionCounts.CV4 || 0],
+              ["CV5 入居完了", conversionCounts.CV5 || 0],
+            ].map(([label, count]) => (
+              <div key={label} className="flex items-center justify-between">
+                <span className="text-slate-600">{label}</span>
+                <b>{count}件</b>
+              </div>
+            ))}
+          </div>
         </section>
         <section className="card p-6">
           <h2 className="text-xl font-black">CSV出力</h2>
@@ -93,6 +117,7 @@ export default async function Admin() {
               ["/admin/export/tours", "見学"],
               ["/admin/export/ads", "広告"],
               ["/admin/export/referrers", "紹介元"],
+              ["/admin/export/conversions", "CV"],
             ].map(([href, label]) => (
               <a className="btn btn-secondary py-2" href={href} key={href}>
                 {label}

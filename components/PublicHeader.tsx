@@ -1,3 +1,4 @@
+import { TrackingLink } from "@/components/TrackingLink";
 import { getSiteSettings, normalizeTelHref } from "@/lib/site-settings";
 
 export async function PublicHeader() {
@@ -16,15 +17,23 @@ export async function PublicHeader() {
           <a href="/#form">相談フォーム</a>
         </nav>
         <div className="flex gap-2">
-          <a
+          <TrackingLink
             className="btn btn-secondary py-2"
+            conversionType="CV2"
             href={normalizeTelHref(settings.phoneNumber)}
+            label="header_phone"
+            metadata={{ phoneNumber: settings.phoneNumber }}
           >
             電話
-          </a>
-          <a className="btn btn-line py-2" href={settings.lineUrl}>
+          </TrackingLink>
+          <TrackingLink
+            className="btn btn-line py-2"
+            conversionType="CV3"
+            href={settings.lineUrl}
+            label="header_line"
+          >
             LINE
-          </a>
+          </TrackingLink>
         </div>
       </div>
     </header>

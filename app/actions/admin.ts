@@ -47,12 +47,13 @@ export async function logout() {
 export async function updateLeadStatus(formData: FormData) {
   await requireAdminSession();
   const id = v(formData, "id");
+  const status = v(formData, "status");
   await supabaseFetch(
     `leads?id=eq.${id}`,
     {
       method: "PATCH",
       body: JSON.stringify({
-        status: v(formData, "status"),
+        status,
         assigned_user_id: v(formData, "assigned_user_id") || null,
         loss_reason: v(formData, "loss_reason") || null,
         reapproach_date: v(formData, "reapproach_date") || null,
@@ -61,6 +62,22 @@ export async function updateLeadStatus(formData: FormData) {
     },
     true,
   );
+  if (status === "入居完了") {
+    await supabaseFetch(
+      "conversion_events",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          event_type: "CV5",
+          lead_id: id,
+          label: "move_in_completed",
+          page_path: `/admin/leads/${id}`,
+        }),
+      },
+      true,
+    );
+  }
+
   revalidatePath(`/admin/leads/${id}`);
   revalidatePath("/admin");
 }
@@ -137,14 +154,18 @@ export async function createRoom(formData: FormData) {
 }
 export async function createTour(formData: FormData) {
   await requireAdminSession();
+  const lead_id = v(formData, "lead_id");
+  const facility_id = v(formData, "facility_id");
+  const scheduled_at = v(formData, "scheduled_at");
+
   await supabaseFetch(
     "tours",
     {
       method: "POST",
       body: JSON.stringify({
-        lead_id: v(formData, "lead_id"),
-        facility_id: v(formData, "facility_id"),
-        scheduled_at: v(formData, "scheduled_at"),
+        lead_id,
+        facility_id,
+        scheduled_at,
         participants: v(formData, "participants"),
         meeting_place: v(formData, "meeting_place"),
         result: v(formData, "result"),
@@ -155,6 +176,22 @@ export async function createTour(formData: FormData) {
     },
     true,
   );
+
+  await supabaseFetch(
+    "conversion_events",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        event_type: "CV4",
+        lead_id,
+        label: "tour_reserved",
+        page_path: "/admin/tours",
+        metadata: { facility_id, scheduled_at },
+      }),
+    },
+    true,
+  );
+
   revalidatePath("/admin/tours");
 }
 

@@ -102,6 +102,21 @@ const exportConfigs: Record<string, ExportConfig> = {
       { key: "move_in_unit_cost", label: "入居単価" },
     ],
   },
+
+  conversions: {
+    path: "conversion_events?select=*,leads(consultant_name,resident_name)&order=created_at.desc",
+    filename: "conversion_events.csv",
+    columns: [
+      { key: "created_at", label: "発生日時" },
+      { key: "event_type", label: "CV種別" },
+      { key: "label", label: "ラベル" },
+      { key: "page_path", label: "ページ" },
+      { key: "leads.consultant_name", label: "相談者" },
+      { key: "leads.resident_name", label: "入居予定者" },
+      { key: "referrer", label: "リファラー" },
+      { key: "user_agent", label: "User Agent" },
+    ],
+  },
   referrers: {
     path: "referrers?select=*&order=name.asc",
     filename: "referrers.csv",

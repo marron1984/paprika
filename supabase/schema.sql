@@ -47,6 +47,18 @@ create table if not exists public.leads (
   updated_at timestamptz default now()
 );
 
+create table if not exists public.conversion_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  lead_id uuid references public.leads(id) on delete set null,
+  label text,
+  page_path text,
+  referrer text,
+  user_agent text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
 create table if not exists public.lead_activities (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid references public.leads(id) on delete cascade,
@@ -163,6 +175,7 @@ create table if not exists public.lp_pages (
 
 alter table public.leads enable row level security;
 alter table public.lead_activities enable row level security;
+alter table public.conversion_events enable row level security;
 alter table public.facilities enable row level security;
 alter table public.rooms enable row level security;
 alter table public.tours enable row level security;
@@ -172,8 +185,10 @@ alter table public.lp_pages enable row level security;
 alter table public.site_settings enable row level security;
 
 create policy "public inquiry insert" on public.leads for insert to anon with check (true);
+create policy "public conversion event insert" on public.conversion_events for insert to anon with check (event_type in ('CV2', 'CV3'));
 create policy "service role full leads" on public.leads for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full activities" on public.lead_activities for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
+create policy "service role full conversion events" on public.conversion_events for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full facilities" on public.facilities for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full rooms" on public.rooms for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full tours" on public.tours for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');

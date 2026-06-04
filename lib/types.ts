@@ -154,3 +154,15 @@ export type SiteSettingsRow = {
   value: SiteSettings;
   updated_at?: string;
 };
+
+export type ConversionEvent = {
+  id: string;
+  event_type: "CV1" | "CV2" | "CV3" | "CV4" | "CV5" | string;
+  lead_id?: string | null;
+  label?: string;
+  page_path?: string;
+  referrer?: string;
+  user_agent?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+};
