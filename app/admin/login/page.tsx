@@ -1,0 +1,28 @@
+import { login } from "@/app/actions/admin";
+export const metadata = { robots: { index: false, follow: false } };
+export default function Login() {
+  return (
+    <main className="grid min-h-screen place-items-center bg-slate-50 p-5">
+      <form action={login} className="card grid w-full max-w-md gap-5 p-8">
+        <div>
+          <p className="badge">管理画面ログイン</p>
+          <h1 className="mt-3 text-3xl font-black">DCかいご相談ダイヤル</h1>
+          <p className="mt-2 text-slate-600">
+            Supabase Authのメール・パスワードでログインします。
+          </p>
+        </div>
+        <label className="label">
+          メールアドレス
+          <input className="input" type="email" name="email" required />
+        </label>
+        <label className="label">
+          パスワード
+          <input className="input" type="password" name="password" required />
+        </label>
+        <button className="btn btn-primary" type="submit">
+          ログイン
+        </button>
+      </form>
+    </main>
+  );
+}
