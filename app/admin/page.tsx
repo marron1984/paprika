@@ -1,28 +1,40 @@
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
 import { requireSession, supabaseFetch } from "@/lib/supabase-rest";
-import type { ConversionEvent, Lead, Room, Tour } from "@/lib/types";
+import type {
+  ConversionEvent,
+  Lead,
+  Notification,
+  Room,
+  Tour,
+} from "@/lib/types";
 
 export default async function Admin() {
   if (!(await requireSession())) redirect("/admin/login");
-  const [leads, rooms, tours, conversionEvents] = await Promise.all([
-    supabaseFetch<Lead[]>(
-      "leads?select=*&order=created_at.desc&limit=200",
-      {},
-      true,
-    ),
-    supabaseFetch<Room[]>("rooms?select=*&limit=200", {}, true),
-    supabaseFetch<Tour[]>(
-      "tours?select=*&order=scheduled_at.desc&limit=50",
-      {},
-      true,
-    ),
-    supabaseFetch<ConversionEvent[]>(
-      "conversion_events?select=*&order=created_at.desc&limit=500",
-      {},
-      true,
-    ),
-  ]);
+  const [leads, rooms, tours, conversionEvents, notifications] =
+    await Promise.all([
+      supabaseFetch<Lead[]>(
+        "leads?select=*&order=created_at.desc&limit=200",
+        {},
+        true,
+      ),
+      supabaseFetch<Room[]>("rooms?select=*&limit=200", {}, true),
+      supabaseFetch<Tour[]>(
+        "tours?select=*&order=scheduled_at.desc&limit=50",
+        {},
+        true,
+      ),
+      supabaseFetch<ConversionEvent[]>(
+        "conversion_events?select=*&order=created_at.desc&limit=500",
+        {},
+        true,
+      ),
+      supabaseFetch<Notification[]>(
+        "notifications?select=*&is.read_at.null&limit=100",
+        {},
+        true,
+      ),
+    ]);
   const month = new Date().toISOString().slice(0, 7);
   const monthly = leads.filter((l) => l.created_at?.startsWith(month));
   const moved = leads.filter((l) => l.status === "入居完了").length;
@@ -50,6 +62,7 @@ export default async function Admin() {
     ["空室数", vacant],
     ["電話タップ", conversionCounts.CV2 || 0],
     ["LINE追加", conversionCounts.CV3 || 0],
+    ["未読通知", notifications.length],
   ];
   const status = Object.entries(
     leads.reduce<Record<string, number>>((a, l) => {

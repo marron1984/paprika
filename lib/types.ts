@@ -166,3 +166,17 @@ export type ConversionEvent = {
   metadata?: Record<string, unknown>;
   created_at: string;
 };
+
+export type Notification = {
+  id: string;
+  notification_type: string;
+  title: string;
+  body?: string;
+  lead_id?: string | null;
+  tour_id?: string | null;
+  due_at?: string | null;
+  priority: "low" | "normal" | "high" | string;
+  read_at?: string | null;
+  created_at: string;
+  leads?: { consultant_name: string; resident_name?: string };
+};

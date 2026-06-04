@@ -4,6 +4,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const links = [
     ["/admin", "ダッシュボード"],
     ["/admin/leads", "案件一覧"],
+    ["/admin/notifications", "通知センター"],
     ["/admin/facilities", "施設管理"],
     ["/admin/rooms", "部屋管理"],
     ["/admin/tours", "見学管理"],

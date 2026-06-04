@@ -55,6 +55,21 @@ export async function createInquiry(formData: FormData) {
   );
 
   await supabaseFetch(
+    "notifications",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        notification_type: "new_inquiry",
+        title: "新規問い合わせが届きました",
+        body: `${consultant_name}様 / ${consultant_phone}`,
+        lead_id: insertedLeads[0]?.id || null,
+        priority: "high",
+      }),
+    },
+    true,
+  );
+
+  await supabaseFetch(
     "conversion_events",
     {
       method: "POST",

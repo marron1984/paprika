@@ -64,6 +64,21 @@ export async function updateLeadStatus(formData: FormData) {
   );
   if (status === "入居完了") {
     await supabaseFetch(
+      "notifications",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          notification_type: "move_in_completed",
+          title: "入居完了になりました",
+          body: "CV5として記録しました。",
+          lead_id: id,
+          priority: "normal",
+        }),
+      },
+      true,
+    );
+
+    await supabaseFetch(
       "conversion_events",
       {
         method: "POST",
@@ -172,6 +187,22 @@ export async function createTour(formData: FormData) {
         impression: v(formData, "impression"),
         next_action: v(formData, "next_action"),
         note: v(formData, "note"),
+      }),
+    },
+    true,
+  );
+
+  await supabaseFetch(
+    "notifications",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        notification_type: "tour_reserved",
+        title: "見学予約が登録されました",
+        body: scheduled_at,
+        lead_id,
+        due_at: scheduled_at,
+        priority: "normal",
       }),
     },
     true,
@@ -305,4 +336,20 @@ export async function updateSiteSettings(formData: FormData) {
   );
   revalidatePath("/admin/settings");
   revalidatePath("/", "layout");
+}
+
+export async function markNotificationRead(formData: FormData) {
+  await requireAdminSession();
+  const id = v(formData, "id");
+
+  await supabaseFetch(
+    `notifications?id=eq.${id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ read_at: new Date().toISOString() }),
+    },
+    true,
+  );
+  revalidatePath("/admin/notifications");
+  revalidatePath("/admin");
 }

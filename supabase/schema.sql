@@ -120,6 +120,19 @@ create table if not exists public.tours (
   created_at timestamptz default now()
 );
 
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  notification_type text not null,
+  title text not null,
+  body text,
+  lead_id uuid references public.leads(id) on delete cascade,
+  tour_id uuid references public.tours(id) on delete cascade,
+  due_at timestamptz,
+  priority text not null default 'normal',
+  read_at timestamptz,
+  created_at timestamptz default now()
+);
+
 create table if not exists public.referrers (
   id uuid primary key default gen_random_uuid(),
   type text,
@@ -175,6 +188,7 @@ create table if not exists public.lp_pages (
 
 alter table public.leads enable row level security;
 alter table public.lead_activities enable row level security;
+alter table public.notifications enable row level security;
 alter table public.conversion_events enable row level security;
 alter table public.facilities enable row level security;
 alter table public.rooms enable row level security;
@@ -188,6 +202,7 @@ create policy "public inquiry insert" on public.leads for insert to anon with ch
 create policy "public conversion event insert" on public.conversion_events for insert to anon with check (event_type in ('CV2', 'CV3'));
 create policy "service role full leads" on public.leads for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full activities" on public.lead_activities for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
+create policy "service role full notifications" on public.notifications for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full conversion events" on public.conversion_events for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full facilities" on public.facilities for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
 create policy "service role full rooms" on public.rooms for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
